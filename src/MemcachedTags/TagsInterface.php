@@ -13,7 +13,7 @@ namespace MemcachedTags;
 interface TagsInterface {
 
     /**
-     * Add add tag(s) for key(s)
+     * Add tag(s) for key(s)
      * @param string|string[] $tags
      * @param string|string[] $keys
      * @return int Returns count of created/updated tags.
@@ -21,39 +21,33 @@ interface TagsInterface {
     public function addTags($tags, $keys);
 
     /**
-     * Delete all keys by some tag(s)
-     * @param string|string[] $tags
-     * @return int Returns count of keys.
+     * Delete all keys by tag
+     * @param string|string[] $tag
+     * @return int Returns count of deleted keys.
      */
-    public function deleteKeysByTags($tags);
+    public function deleteKeysByTag($tag);
 
     /**
-     * Delete tag(s). It is not affect keys.
-     * @param string|string[] $tags
-     * @return int Return count of deleted tags.
+     * Delete all keys by tags
+     * @param string[] $tags
+     * @param int $compilation
+     * @return int Returns count of deleted keys.
      */
-    public function deleteTags($tags);
+    public function deleteKeysByTags(array $tags, $compilation);
 
     /**
-     * Get keys by tag(s).
-     * @param string|string[] $tags
+     * Get keys by tag.
+     * @param string $tag
      * @return string[] Returns list of keys.
      */
-    public function getKeysByTags($tags);
+    public function getKeysByTag($tag);
 
     /**
-     * Get key name for tag(s).
-     * @param string|string[] $tags
-     * @return string|string[]
+     * Get keys by tags.
+     * @param string[] $tags
+     * @param int $compilation
+     * @return string[] Returns list of keys.
      */
-    public function getTagKeyNames($tags);
-
-    /**
-     * Update expiration for tag(s). It is not affect keys.
-     * @param string|string[] $tags
-     * @param int $expiration
-     * @return int Returns count of updated tags
-     */
-    public function touchTags($tags, $expiration = 0);
+    public function getKeysByTags(array $tags, $compilation);
 
 }
