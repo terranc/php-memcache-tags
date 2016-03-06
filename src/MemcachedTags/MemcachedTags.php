@@ -18,6 +18,8 @@ class MemcachedTags implements TagsInterface {
 
     const VERSION = '0.1.0';
 
+    const ATTEMPT_USLEEP = 0.005;
+
     protected $keySeparator = '|;|';
 
     protected $tagsSetAttempts = 2;
@@ -53,7 +55,7 @@ class MemcachedTags implements TagsInterface {
         $keys = (array) $keys;
         foreach ($keys as $tag) {
             if (strpos($tag, $this->keySeparator) !== false) {
-                throw new InvalidArgumentException('Please, do not use "'. $this->keySeparator .'" in key name');
+                throw new InvalidArgumentException('Please, do not use "'. $this->keySeparator .'" in name of key');
             }
         }
     }
@@ -62,7 +64,8 @@ class MemcachedTags implements TagsInterface {
      * @inheritdoc
      */
     public function addTags($tags, $keys) {
-        $tags = (array) $tags;
+        $tags = is_array($tags) ? array_unique($tags) : (array) $tags;
+        $keys = is_array($keys) ? array_unique($keys) : (array) $keys;
         $locks = $this->getLocksForTags($tags);
         $this->checkKeysName($keys);
         $result = 0;
@@ -81,9 +84,9 @@ class MemcachedTags implements TagsInterface {
                     ++$result;
                     continue 2;
                 }
+                usleep(self::ATTEMPT_USLEEP);
             } while (--$attempts > 0);
         }
-        unset($locks);
         return $result;
     }
 
@@ -92,9 +95,8 @@ class MemcachedTags implements TagsInterface {
      */
     public function deleteKeysByTags($tags) {
         $locks = $this->getLocksForTags($tags);
-        $result = $this->Memcached->deleteMulti($this->getKeysByTags($tags))
-            && $this->Memcached->deleteMulti($this->getTagKeyNames((array) $tags));
-        unset($locks);
+        $result = $this->deleteMulti($this->getKeysByTags($tags));
+        $this->deleteMulti($this->getTagKeyNames((array) $tags));
         return $result;
     }
 
@@ -102,10 +104,7 @@ class MemcachedTags implements TagsInterface {
      * @inheritdoc
      */
     public function deleteTags($tags) {
-        $locks = $this->getLocksForTags($tags);
-        $result = $this->Memcached->deleteMulti($this->getTagKeyNames((array) $tags));
-        unset($locks);
-        return $result;
+        return $this->deleteMulti($this->getTagKeyNames((array) $tags));
     }
 
     /**
@@ -126,7 +125,7 @@ class MemcachedTags implements TagsInterface {
                 }
             }
         }
-        return array_unique($keys);
+        return $keys ? array_unique($keys) : $keys;
     }
 
     /**
@@ -165,9 +164,7 @@ class MemcachedTags implements TagsInterface {
         $tagKeys = $this->getKeysByTags((array) $tags);
         $locks = [];
         foreach ($tagKeys as $key) {
-            $Lock = $this->createLock($this->prefix . $this->lockPrefix . $key);
-            $Lock->acquire(2, 3);
-            $locks[] = $Lock;
+            $locks[] = $this->createLock($this->prefix . $this->lockPrefix . $key);
         }
         return $locks;
     }
@@ -177,6 +174,23 @@ class MemcachedTags implements TagsInterface {
      * @return MemcachedLock
      */
     protected function createLock($key) {
-        return new MemcachedLock($this->Memcached, $key);
+        $Lock = new MemcachedLock($this->Memcached, $key);
+        $Lock->acquire(2, 3);
+        return $Lock;
+    }
+
+    /**
+     * @param string[] $keys
+     * @return int
+     */
+    protected function deleteMulti($keys) {
+        // I do not use Memcached::deleteMulti, because it returns strange results.
+        $result = 0;
+        foreach ($keys as $key) {
+            if ($this->Memcached->delete($key)) {
+                ++$result;
+            }
+        }
+        return $result;
     }
 } 
