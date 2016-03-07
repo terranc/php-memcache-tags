@@ -69,15 +69,15 @@ class MemcachedTagsParallelTest extends \PHPUnit_Framework_TestCase {
         }
         $count1 = 0;
         for ($i = 1; $i <= 1000; ++$i) {
-            $count1 += $MemcachedTags->deleteKeysByTags('tag1');
+            $count1 += $MemcachedTags->deleteKeysByTag('tag1');
             $MemcachedTags->deleteKeysByTags(['tag2', 'tag3']);
         }
 
         $Parallel->wait(['foo', 'bar']);
 
-        $keys1 = $MemcachedTags->getKeysByTags('tag1');
-        $keys2 = $MemcachedTags->getKeysByTags('tag2');
-        $keys3 = $MemcachedTags->getKeysByTags('tag3');
+        $keys1 = $MemcachedTags->getKeysByTag('tag1');
+        $keys2 = $MemcachedTags->getKeysByTag('tag2');
+        $keys3 = $MemcachedTags->getKeysByTag('tag3');
 
         for ($i = 1; $i <= 1000; ++$i) {
             $value = $MC->get('key_1_'. $i);

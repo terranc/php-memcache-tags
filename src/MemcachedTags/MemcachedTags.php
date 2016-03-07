@@ -39,7 +39,7 @@ class MemcachedTags implements TagsInterface {
      * @param Memcached $Memcached
      * @param string $prefix
      */
-    public function __construct(Memcached $Memcached, $prefix) {
+    public function __construct(Memcached $Memcached, $prefix = 'mtag') {
         $this->Memcached = $Memcached;
         $this->prefix = $prefix;
     }
