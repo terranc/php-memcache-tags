@@ -13,41 +13,41 @@ namespace MemcachedTags;
 interface TagsInterface {
 
     /**
+     * Add tag(s) for key(s)
      * @param string|string[] $tags
      * @param string|string[] $keys
-     * @return int
+     * @return int Returns count of created/updated tags.
      */
     public function addTags($tags, $keys);
 
     /**
-     * @param string|string[] $tags
-     * @return bool
+     * Delete all keys by tag
+     * @param string|string[] $tag
+     * @return int Returns count of deleted keys.
      */
-    public function deleteKeysByTags($tags);
+    public function deleteKeysByTag($tag);
 
     /**
-     * @param string|string[] $tags
-     * @return bool
+     * Delete all keys by tags
+     * @param string[] $tags
+     * @param int $compilation
+     * @return int Returns count of deleted keys.
      */
-    public function deleteTags($tags);
+    public function deleteKeysByTags(array $tags, $compilation);
 
     /**
-     * @param string|string[] $tags
-     * @return string[]
+     * Get keys by tag.
+     * @param string $tag
+     * @return string[] Returns list of keys.
      */
-    public function getKeysByTags($tags);
+    public function getKeysByTag($tag);
 
     /**
-     * @param string|string[] $tags
-     * @return string|string[]
+     * Get keys by tags.
+     * @param string[] $tags
+     * @param int $compilation
+     * @return string[] Returns list of keys.
      */
-    public function getTagKeyNames($tags);
-
-    /**
-     * @param string|string[] $tags
-     * @param int $expiration
-     * @return int
-     */
-    public function touchTags($tags, $expiration = 0);
+    public function getKeysByTags(array $tags, $compilation);
 
 }
