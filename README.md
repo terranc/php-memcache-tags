@@ -2,7 +2,7 @@
 
 # MemcachedTags v1.0.0 for PHP >= 5.5
 
-## CLASS IS IN DEVELOPMENT, but it works well already.
+## CLASS IS IN DEVELOPMENT
 
 ## About
 MemcachedTags for PHP is a mechanism for adding tags to keys in Memcached. It is very useful, if you need to delete or delete some keys by tags.
