@@ -5,7 +5,7 @@
 ## CLASS IS IN DEVELOPMENT, but it works well already.
 
 ## About
-MemcachedTags for PHP is a mechanism for adding tags to keys in Memcached. It is very useful, if you need to delete or delete some keys by tags.
+MemcachedTags for PHP is a mechanism for adding tags to keys in Memcached. It is very useful, if you need to select or delete some keys by tags. And tags are really useful for group invalidation.
 ## Usage
 
 ```php
@@ -202,7 +202,7 @@ $MemcachedTags->getKeysByTag('red');
 
 #### `string[]|array` MemcachedTags :: getKeysByTags ( `string[]` **$tags** [, `int` **$compilation** = MemcachedTags::COMPILATION_ALL] )
 ---
-Delete keys by several tags. Returns count of deleted keys.
+Returns a list of keys by several tags.
 
 ##### Method Pameters
 1. string[] **tags** - List of tags

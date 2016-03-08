@@ -32,54 +32,38 @@ class MemcachedTagsParallelTest extends \PHPUnit_Framework_TestCase {
 
         $start = microtime(true) + 2;
 
-        // 1st operation
-        $Parallel->run('foo', function() use ($start) {
-            $MemcachedTags = new MemcachedTags($MC = $this->getMemcached(), 'tag_');
-            while (microtime(true) < $start) {
-                // wait for start
-            }
-            for ($i = 1; $i <= 1000; ++$i) {
-                $MC->set('key_1_'. $i, $i);
-                $MC->set('key_2_'. $i, $i);
-                $MemcachedTags->addTags('tag1', 'key_1_'. $i);
-                $MemcachedTags->addTags(['tag2', 'tag3'], 'key_2_'. $i);
-            }
-            return 1;
-        });
+        for ($i = 1; $i <= 5; $i++) {
+            $Parallel->run('foo'.$i, function () use ($start) {
+                $MemcachedTags = new MemcachedTags($MC = $this->getMemcached(), 'tag');
+                while (microtime(true) < $start) {
+                    // wait for start
+                }
+                for ($i = 1; $i <= 1000; ++$i) {
+                    $j = mt_rand(1, 100);
+                    $MemcachedTags->setKeyWithTags('key_1_' . $j, $j, 'tag1');
+                    $MemcachedTags->setKeysWithTags(['key_2_'.$j => $j, 'key_3_'.$j => $j], ['tag2', 'tag3']);
+                }
+                return 1;
+            });
+        }
 
-        // 2st operation
-        $Parallel->run('bar', function() use ($start) {
-            $MemcachedTags = new MemcachedTags($MC = $this->getMemcached(), 'tag_');
-            while (microtime(true) < $start) {
-                // wait for start
-            }
-            for ($i = 1; $i <= 1000; ++$i) {
-                $MC->set('key_1_'. $i, $i);
-                $MC->set('key_2_'. $i, $i);
-                $MemcachedTags->addTags('tag1', 'key_1_'. $i);
-                $MemcachedTags->addTags(['tag2', 'tag3'], 'key_2_'. $i);
-            }
-            return 1;
-        });
-
-        $MemcachedTags = new MemcachedTags($MC = $this->getMemcached(), 'tag_');
+        $MemcachedTags = new MemcachedTags($MC = $this->getMemcached(), 'tag');
 
         while (microtime(true) < $start) {
             // wait for start
         }
-        $count1 = 0;
         for ($i = 1; $i <= 1000; ++$i) {
-            $count1 += $MemcachedTags->deleteKeysByTag('tag1');
+            $MemcachedTags->deleteKeysByTag('tag1');
             $MemcachedTags->deleteKeysByTags(['tag2', 'tag3']);
         }
 
-        $Parallel->wait(['foo', 'bar']);
+        $Parallel->wait(['foo1','foo2','foo3','foo4','foo5']);
 
         $keys1 = $MemcachedTags->getKeysByTag('tag1');
         $keys2 = $MemcachedTags->getKeysByTag('tag2');
         $keys3 = $MemcachedTags->getKeysByTag('tag3');
 
-        for ($i = 1; $i <= 1000; ++$i) {
+        for ($i = 1; $i <= 100; ++$i) {
             $value = $MC->get('key_1_'. $i);
             $this->assertSame($value ? true : false, in_array('key_1_' . $i, $keys1));
 
