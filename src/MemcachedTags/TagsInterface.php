@@ -13,12 +13,40 @@ namespace MemcachedTags;
 interface TagsInterface {
 
     /**
-     * Add tag(s) for key(s)
+     * Add tag(s) to key(s)
      * @param string|string[] $tags
      * @param string|string[] $keys
      * @return int Returns count of created/updated tags.
      */
-    public function addTags($tags, $keys);
+    public function addTagsToKeys($tags, $keys);
+
+    /**
+     * Delete key and update dependent tags
+     * @param string $key
+     * @return int Returns count of deleted key
+     */
+    //public function deleteKey($key);
+
+    /**
+     * Delete keys and update dependent tags
+     * @param string[] $keys
+     * @return int Returns count of deleted key
+     */
+    //public function deleteKeys($keys);
+
+    /**
+     * Delete tag. Keys will not be affected.
+     * @param string $tag
+     * @return int Returns count of deleted tags
+     */
+    //public function deleteTag($tag);
+
+    /**
+     * Delete tags. Keys will not be affected.
+     * @param string[] $tags
+     * @return int Returns count of deleted tags
+     */
+    //public function deleteTags($tags);
 
     /**
      * Delete all keys by tag
@@ -49,5 +77,27 @@ interface TagsInterface {
      * @return string[] Returns list of keys.
      */
     public function getKeysByTags(array $tags, $compilation);
+
+    /**
+     * Get tags by key.
+     * @param string $key
+     * @return string[] Returns list of tags.
+     */
+    public function getTagsByKey($key);
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @param string|string[] $tags
+     * @return mixed
+     */
+    //public function setKeyWithTags($key, $value, $tags);
+
+    /**
+     * @param array $keys
+     * @param string|string[] $tags
+     * @return mixed
+     */
+    //public function setKeysWithTags($keys, $tags);
 
 }

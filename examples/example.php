@@ -20,14 +20,14 @@ $Memcached->set('user:3', '{"name": "Ilya",      "sex": "m", "country": "Russia"
 $Memcached->set('user:4', '{"name": "Dima",      "sex": "m", "country": "Russia", "city": "Murmansk"}');
 $Memcached->set('user:5', '{"name": "Dom",       "sex": "m", "country": "UK",     "city": "London"}');
 
-$MemcachedTags->addTags(['city:London', 'country:UK'], ['user:1', 'user:2', 'user:5']);
-$MemcachedTags->addTags(['city:Murmansk', 'country:Russia'], 'user:4');
-$MemcachedTags->addTags(['city:Petersburg', 'country:Russia'], 'user:3');
+$MemcachedTags->addTagsToKeys(['city:London', 'country:UK'], ['user:1', 'user:2', 'user:5']);
+$MemcachedTags->addTagsToKeys(['city:Murmansk', 'country:Russia'], 'user:4');
+$MemcachedTags->addTagsToKeys(['city:Petersburg', 'country:Russia'], 'user:3');
 
-$MemcachedTags->addTags('sex:m', ['user:1', 'user:3', 'user:4', 'user:5']);
-$MemcachedTags->addTags('sex:f', 'user:2');
+$MemcachedTags->addTagsToKeys('sex:m', ['user:1', 'user:3', 'user:4', 'user:5']);
+$MemcachedTags->addTagsToKeys('sex:f', 'user:2');
 
-$MemcachedTags->addTags('all', ['user:1','user:2', 'user:3', 'user:4', 'user:5']);
+$MemcachedTags->addTagsToKeys('all', ['user:1','user:2', 'user:3', 'user:4', 'user:5']);
 
 // Example 3. Get keys by tags
 

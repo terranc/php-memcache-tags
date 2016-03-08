@@ -33,47 +33,47 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @see MemcachedTags::addTags
+     * @see MemcachedTags::addTagsToKeys
      */
     public function test_addTags() {
         $MC = static::$Memcached;
         $MemcachedTags = new MemcachedTags($MC, 'tag');
 
-        $this->assertSame(true, $MemcachedTags->addTags(['city:London', 'country:UK'], ['user:1', 'user:2', 'user:5']));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_city:London'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_country:UK'));
-        $this->assertSame('["city:London","country:UK"]', $MC->get('tag_k_user:1'));
-        $this->assertSame('["city:London","country:UK"]', $MC->get('tag_k_user:2'));
-        $this->assertSame('["city:London","country:UK"]', $MC->get('tag_k_user:5'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys(['city:London', 'country:UK'], ['user:1', 'user:2', 'user:5']));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_city:London'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_country:UK'));
+        $this->assertSame('city:London||country:UK', $MC->get('tag_k_user:1'));
+        $this->assertSame('city:London||country:UK', $MC->get('tag_k_user:2'));
+        $this->assertSame('city:London||country:UK', $MC->get('tag_k_user:5'));
 
-        $this->assertSame(true, $MemcachedTags->addTags(['city:Murmansk', 'country:Russia'], 'user:4'));
-        $this->assertSame('["user:4"]', $MC->get('tag_t_city:Murmansk'));
-        $this->assertSame('["user:4"]', $MC->get('tag_t_country:Russia'));
-        $this->assertSame('["city:Murmansk","country:Russia"]', $MC->get('tag_k_user:4'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys(['city:Murmansk', 'country:Russia'], 'user:4'));
+        $this->assertSame('user:4', $MC->get('tag_t_city:Murmansk'));
+        $this->assertSame('user:4', $MC->get('tag_t_country:Russia'));
+        $this->assertSame('city:Murmansk||country:Russia', $MC->get('tag_k_user:4'));
 
-        $this->assertSame(true, $MemcachedTags->addTags(['city:Petersburg', 'country:Russia'], 'user:3'));
-        $this->assertSame('["user:3"]', $MC->get('tag_t_city:Petersburg'));
-        $this->assertSame('["user:4","user:3"]', $MC->get('tag_t_country:Russia'));
-        $this->assertSame('["city:Petersburg","country:Russia"]', $MC->get('tag_k_user:3'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys(['city:Petersburg', 'country:Russia'], 'user:3'));
+        $this->assertSame('user:3', $MC->get('tag_t_city:Petersburg'));
+        $this->assertSame('user:4||user:3', $MC->get('tag_t_country:Russia'));
+        $this->assertSame('city:Petersburg||country:Russia', $MC->get('tag_k_user:3'));
 
-        $this->assertSame(true, $MemcachedTags->addTags('sex:m', ['user:1', 'user:3', 'user:4', 'user:5']));
-        $this->assertSame('["user:1","user:3","user:4","user:5"]', $MC->get('tag_t_sex:m'));
-        $this->assertSame('["city:London","country:UK","sex:m"]', $MC->get('tag_k_user:1'));
-        $this->assertSame('["city:Petersburg","country:Russia","sex:m"]', $MC->get('tag_k_user:3'));
-        $this->assertSame('["city:Murmansk","country:Russia","sex:m"]', $MC->get('tag_k_user:4'));
-        $this->assertSame('["city:London","country:UK","sex:m"]', $MC->get('tag_k_user:5'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys('sex:m', ['user:1', 'user:3', 'user:4', 'user:5']));
+        $this->assertSame('user:1||user:3||user:4||user:5', $MC->get('tag_t_sex:m'));
+        $this->assertSame('city:London||country:UK||sex:m', $MC->get('tag_k_user:1'));
+        $this->assertSame('city:Petersburg||country:Russia||sex:m', $MC->get('tag_k_user:3'));
+        $this->assertSame('city:Murmansk||country:Russia||sex:m', $MC->get('tag_k_user:4'));
+        $this->assertSame('city:London||country:UK||sex:m', $MC->get('tag_k_user:5'));
 
-        $this->assertSame(true, $MemcachedTags->addTags('sex:f', 'user:2'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_sex:f'));
-        $this->assertSame('["city:London","country:UK","sex:f"]', $MC->get('tag_k_user:2'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys('sex:f', 'user:2'));
+        $this->assertSame('user:2', $MC->get('tag_t_sex:f'));
+        $this->assertSame('city:London||country:UK||sex:f', $MC->get('tag_k_user:2'));
 
-        $this->assertSame(true, $MemcachedTags->addTags('all', ['user:1','user:2', 'user:3', 'user:4', 'user:5']));
-        $this->assertSame('["user:1","user:2","user:3","user:4","user:5"]', $MC->get('tag_t_all'));
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:1'));
-        $this->assertSame('["city:London","country:UK","sex:f","all"]', $MC->get('tag_k_user:2'));
-        $this->assertSame('["city:Petersburg","country:Russia","sex:m","all"]', $MC->get('tag_k_user:3'));
-        $this->assertSame('["city:Murmansk","country:Russia","sex:m","all"]', $MC->get('tag_k_user:4'));
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:5'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys('all', ['user:1','user:2', 'user:3', 'user:4', 'user:5']));
+        $this->assertSame('user:1||user:2||user:3||user:4||user:5', $MC->get('tag_t_all'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:1'));
+        $this->assertSame('city:London||country:UK||sex:f||all', $MC->get('tag_k_user:2'));
+        $this->assertSame('city:Petersburg||country:Russia||sex:m||all', $MC->get('tag_k_user:3'));
+        $this->assertSame('city:Murmansk||country:Russia||sex:m||all', $MC->get('tag_k_user:4'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:5'));
     }
 
     /**
@@ -81,27 +81,27 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      * @param MemcachedTags $MemcachedTags
      */
     protected function addTags(\Memcached $MC, MemcachedTags $MemcachedTags) {
-        $this->assertSame(true, $MemcachedTags->addTags(['city:London', 'country:UK'], ['user:1', 'user:2', 'user:5']));
-        $this->assertSame(true, $MemcachedTags->addTags(['city:Murmansk', 'country:Russia'], 'user:4'));
-        $this->assertSame(true, $MemcachedTags->addTags(['city:Petersburg', 'country:Russia'], 'user:3'));
-        $this->assertSame(true, $MemcachedTags->addTags('sex:m', ['user:1', 'user:3', 'user:4', 'user:5']));
-        $this->assertSame(true, $MemcachedTags->addTags('sex:f', 'user:2'));
-        $this->assertSame(true, $MemcachedTags->addTags('all', ['user:1','user:2', 'user:3', 'user:4', 'user:5']));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys(['city:London', 'country:UK'], ['user:1', 'user:2', 'user:5']));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys(['city:Murmansk', 'country:Russia'], 'user:4'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys(['city:Petersburg', 'country:Russia'], 'user:3'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys('sex:m', ['user:1', 'user:3', 'user:4', 'user:5']));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys('sex:f', 'user:2'));
+        $this->assertSame(true, $MemcachedTags->addTagsToKeys('all', ['user:1','user:2', 'user:3', 'user:4', 'user:5']));
 
-        $this->assertSame('["user:4"]', $MC->get('tag_t_city:Murmansk'));
-        $this->assertSame('["user:3"]', $MC->get('tag_t_city:Petersburg'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_city:London'));
-        $this->assertSame('["user:4","user:3"]', $MC->get('tag_t_country:Russia'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_country:UK'));
-        $this->assertSame('["user:1","user:3","user:4","user:5"]', $MC->get('tag_t_sex:m'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_sex:f'));
-        $this->assertSame('["user:1","user:2","user:3","user:4","user:5"]', $MC->get('tag_t_all'));
+        $this->assertSame('user:4', $MC->get('tag_t_city:Murmansk'));
+        $this->assertSame('user:3', $MC->get('tag_t_city:Petersburg'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_city:London'));
+        $this->assertSame('user:4||user:3', $MC->get('tag_t_country:Russia'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_country:UK'));
+        $this->assertSame('user:1||user:3||user:4||user:5', $MC->get('tag_t_sex:m'));
+        $this->assertSame('user:2', $MC->get('tag_t_sex:f'));
+        $this->assertSame('user:1||user:2||user:3||user:4||user:5', $MC->get('tag_t_all'));
 
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:1'));
-        $this->assertSame('["city:London","country:UK","sex:f","all"]', $MC->get('tag_k_user:2'));
-        $this->assertSame('["city:Petersburg","country:Russia","sex:m","all"]', $MC->get('tag_k_user:3'));
-        $this->assertSame('["city:Murmansk","country:Russia","sex:m","all"]', $MC->get('tag_k_user:4'));
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:5'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:1'));
+        $this->assertSame('city:London||country:UK||sex:f||all', $MC->get('tag_k_user:2'));
+        $this->assertSame('city:Petersburg||country:Russia||sex:m||all', $MC->get('tag_k_user:3'));
+        $this->assertSame('city:Murmansk||country:Russia||sex:m||all', $MC->get('tag_k_user:4'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:5'));
 
         $this->assertSame(true, isset($MC->get('user:1')[0]));
         $this->assertSame(true, isset($MC->get('user:2')[0]));
@@ -121,20 +121,20 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame(1, $MemcachedTags->deleteKeysByTag('sex:f'));
         $this->assertSame(0, $MemcachedTags->deleteKeysByTag('sex:f'));
 
-        $this->assertSame('["user:4"]', $MC->get('tag_t_city:Murmansk'));
-        $this->assertSame('["user:3"]', $MC->get('tag_t_city:Petersburg'));
-        $this->assertSame('["user:1","user:5"]', $MC->get('tag_t_city:London'));
-        $this->assertSame('["user:4","user:3"]', $MC->get('tag_t_country:Russia'));
-        $this->assertSame('["user:1","user:5"]', $MC->get('tag_t_country:UK'));
-        $this->assertSame('["user:1","user:3","user:4","user:5"]', $MC->get('tag_t_sex:m'));
+        $this->assertSame('user:4', $MC->get('tag_t_city:Murmansk'));
+        $this->assertSame('user:3', $MC->get('tag_t_city:Petersburg'));
+        $this->assertSame('user:1||user:5', $MC->get('tag_t_city:London'));
+        $this->assertSame('user:4||user:3', $MC->get('tag_t_country:Russia'));
+        $this->assertSame('user:1||user:5', $MC->get('tag_t_country:UK'));
+        $this->assertSame('user:1||user:3||user:4||user:5', $MC->get('tag_t_sex:m'));
         $this->assertSame(false, $MC->get('tag_t_sex:f'));
-        $this->assertSame('["user:1","user:3","user:4","user:5"]', $MC->get('tag_t_all'));
+        $this->assertSame('user:1||user:3||user:4||user:5', $MC->get('tag_t_all'));
 
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:1'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:1'));
         $this->assertSame(false, $MC->get('tag_k_user:2'));
-        $this->assertSame('["city:Petersburg","country:Russia","sex:m","all"]', $MC->get('tag_k_user:3'));
-        $this->assertSame('["city:Murmansk","country:Russia","sex:m","all"]', $MC->get('tag_k_user:4'));
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:5'));
+        $this->assertSame('city:Petersburg||country:Russia||sex:m||all', $MC->get('tag_k_user:3'));
+        $this->assertSame('city:Murmansk||country:Russia||sex:m||all', $MC->get('tag_k_user:4'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:5'));
 
         $this->assertSame(true, isset($MC->get('user:1')[0]));
         $this->assertSame(false, isset($MC->get('user:2')[0]));
@@ -144,19 +144,19 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertSame(2, $MemcachedTags->deleteKeysByTag('city:London'));
 
-        $this->assertSame('["user:4"]', $MC->get('tag_t_city:Murmansk'));
-        $this->assertSame('["user:3"]', $MC->get('tag_t_city:Petersburg'));
+        $this->assertSame('user:4', $MC->get('tag_t_city:Murmansk'));
+        $this->assertSame('user:3', $MC->get('tag_t_city:Petersburg'));
         $this->assertSame(false, $MC->get('tag_t_city:London'));
-        $this->assertSame('["user:4","user:3"]', $MC->get('tag_t_country:Russia'));
+        $this->assertSame('user:4||user:3', $MC->get('tag_t_country:Russia'));
         $this->assertSame(false, $MC->get('tag_t_country:UK'));
-        $this->assertSame('["user:3","user:4"]', $MC->get('tag_t_sex:m'));
+        $this->assertSame('user:3||user:4', $MC->get('tag_t_sex:m'));
         $this->assertSame(false, $MC->get('tag_t_sex:f'));
-        $this->assertSame('["user:3","user:4"]', $MC->get('tag_t_all'));
+        $this->assertSame('user:3||user:4', $MC->get('tag_t_all'));
 
         $this->assertSame(false, $MC->get('tag_k_user:1'));
         $this->assertSame(false, $MC->get('tag_k_user:2'));
-        $this->assertSame('["city:Petersburg","country:Russia","sex:m","all"]', $MC->get('tag_k_user:3'));
-        $this->assertSame('["city:Murmansk","country:Russia","sex:m","all"]', $MC->get('tag_k_user:4'));
+        $this->assertSame('city:Petersburg||country:Russia||sex:m||all', $MC->get('tag_k_user:3'));
+        $this->assertSame('city:Murmansk||country:Russia||sex:m||all', $MC->get('tag_k_user:4'));
         $this->assertSame(false, $MC->get('tag_k_user:5'));
 
         $this->assertSame(false, isset($MC->get('user:1')[0]));
@@ -199,20 +199,20 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertSame(1, $MemcachedTags->deleteKeysByTags(['country:Russia', 'city:Murmansk'], MemcachedTags::COMPILATION_XOR));
 
-        $this->assertSame('["user:4"]', $MC->get('tag_t_city:Murmansk'));
+        $this->assertSame('user:4', $MC->get('tag_t_city:Murmansk'));
         $this->assertSame(false, $MC->get('tag_t_city:Petersburg'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_city:London'));
-        $this->assertSame('["user:4"]', $MC->get('tag_t_country:Russia'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_country:UK'));
-        $this->assertSame('["user:1","user:4","user:5"]', $MC->get('tag_t_sex:m'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_sex:f'));
-        $this->assertSame('["user:1","user:2","user:4","user:5"]', $MC->get('tag_t_all'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_city:London'));
+        $this->assertSame('user:4', $MC->get('tag_t_country:Russia'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_country:UK'));
+        $this->assertSame('user:1||user:4||user:5', $MC->get('tag_t_sex:m'));
+        $this->assertSame('user:2', $MC->get('tag_t_sex:f'));
+        $this->assertSame('user:1||user:2||user:4||user:5', $MC->get('tag_t_all'));
 
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:1'));
-        $this->assertSame('["city:London","country:UK","sex:f","all"]', $MC->get('tag_k_user:2'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:1'));
+        $this->assertSame('city:London||country:UK||sex:f||all', $MC->get('tag_k_user:2'));
         $this->assertSame(false, $MC->get('tag_k_user:3'));
-        $this->assertSame('["city:Murmansk","country:Russia","sex:m","all"]', $MC->get('tag_k_user:4'));
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:5'));
+        $this->assertSame('city:Murmansk||country:Russia||sex:m||all', $MC->get('tag_k_user:4'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:5'));
 
         $this->assertSame(true, isset($MC->get('user:1')[0]));
         $this->assertSame(true, isset($MC->get('user:2')[0]));
@@ -224,18 +224,18 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertSame(false, $MC->get('tag_t_city:Murmansk'));
         $this->assertSame(false, $MC->get('tag_t_city:Petersburg'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_city:London'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_city:London'));
         $this->assertSame(false, $MC->get('tag_t_country:Russia'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_country:UK'));
-        $this->assertSame('["user:1","user:5"]', $MC->get('tag_t_sex:m'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_sex:f'));
-        $this->assertSame('["user:1","user:2","user:5"]', $MC->get('tag_t_all'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_country:UK'));
+        $this->assertSame('user:1||user:5', $MC->get('tag_t_sex:m'));
+        $this->assertSame('user:2', $MC->get('tag_t_sex:f'));
+        $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_all'));
 
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:1'));
-        $this->assertSame('["city:London","country:UK","sex:f","all"]', $MC->get('tag_k_user:2'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:1'));
+        $this->assertSame('city:London||country:UK||sex:f||all', $MC->get('tag_k_user:2'));
         $this->assertSame(false, $MC->get('tag_k_user:3'));
         $this->assertSame(false, $MC->get('tag_k_user:4'));
-        $this->assertSame('["city:London","country:UK","sex:m","all"]', $MC->get('tag_k_user:5'));
+        $this->assertSame('city:London||country:UK||sex:m||all', $MC->get('tag_k_user:5'));
 
         $this->assertSame(true, isset($MC->get('user:1')[0]));
         $this->assertSame(true, isset($MC->get('user:2')[0]));
@@ -249,15 +249,15 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertSame(false, $MC->get('tag_t_city:Murmansk'));
         $this->assertSame(false, $MC->get('tag_t_city:Petersburg'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_city:London'));
+        $this->assertSame('user:2', $MC->get('tag_t_city:London'));
         $this->assertSame(false, $MC->get('tag_t_country:Russia'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_country:UK'));
+        $this->assertSame('user:2', $MC->get('tag_t_country:UK'));
         $this->assertSame(false, $MC->get('tag_t_sex:m'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_sex:f'));
-        $this->assertSame('["user:2"]', $MC->get('tag_t_all'));
+        $this->assertSame('user:2', $MC->get('tag_t_sex:f'));
+        $this->assertSame('user:2', $MC->get('tag_t_all'));
 
         $this->assertSame(false, $MC->get('tag_k_user:1'));
-        $this->assertSame('["city:London","country:UK","sex:f","all"]', $MC->get('tag_k_user:2'));
+        $this->assertSame('city:London||country:UK||sex:f||all', $MC->get('tag_k_user:2'));
         $this->assertSame(false, $MC->get('tag_k_user:3'));
         $this->assertSame(false, $MC->get('tag_k_user:4'));
         $this->assertSame(false, $MC->get('tag_k_user:5'));
