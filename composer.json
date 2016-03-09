@@ -4,7 +4,7 @@
   "description": "MemcachedTags for PHP is ...",
   "homepage": "http://github.com/cheprasov/php-memcached-tags",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "MIT",
   "authors": [
     {
       "name": "Alexander Cheprasov",
