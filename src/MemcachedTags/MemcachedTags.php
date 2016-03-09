@@ -16,7 +16,7 @@ use MemcachedLock\MemcachedLock;
 
 class MemcachedTags implements TagsInterface {
 
-    const VERSION = '1.0.0';
+    const VERSION = '1.0.1';
 
     const COMPILATION_ALL = 0;
     const COMPILATION_AND = 1;
