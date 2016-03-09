@@ -1,5 +1,4 @@
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
-[![Latest Stable Version](https://poser.pugx.org/cheprasov/php-memcached-tags/v/stable)](https://packagist.org/packages/cheprasov/php-memcached-tags)
 [![Total Downloads](https://poser.pugx.org/cheprasov/php-memcached-tags/downloads)](https://packagist.org/packages/cheprasov/php-memcached-tags)
 
 # MemcachedTags v1.0.1 for PHP >= 5.5
@@ -22,9 +21,8 @@ use MemcachedTags\MemcachedTags;
 
 $Memcached = new \Memcached();
 $Memcached->addServer('127.0.0.1', '11211');
-$Memcached->flush();
 
-$MemcachedTags = new MemcachedTags($Memcached, 'tag_');
+$MemcachedTags = new MemcachedTags($Memcached);
 
 // Example 2. Adding some tags to key
 
