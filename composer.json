@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "MemcachedTags for PHP is ...",
   "homepage": "http://github.com/cheprasov/php-memcached-tags",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
     {
