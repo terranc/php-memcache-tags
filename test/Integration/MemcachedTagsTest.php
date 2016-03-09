@@ -37,7 +37,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function test_addTagsToKeys() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
 
         $this->assertSame(true, $MemcachedTags->addTagsToKeys(['city:London', 'country:UK'], ['user:1', 'user:2', 'user:5']));
         $this->assertSame('user:1||user:2||user:5', $MC->get('tag_t_city:London'));
@@ -115,7 +115,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function test_deleteKeys() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $this->addTags($MC, $MemcachedTags);
 
         $this->assertSame(0, $MemcachedTags->deleteKeys(['user:foo']));
@@ -196,7 +196,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function test_deleteTags() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $this->addTags($MC, $MemcachedTags);
 
         $this->assertSame(0, $MemcachedTags->deleteTags(['tag:foo']));
@@ -304,7 +304,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function test_deleteKeysByTag() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $this->addTags($MC, $MemcachedTags);
 
         $this->assertSame(1, $MemcachedTags->deleteKeysByTag('sex:f'));
@@ -383,7 +383,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function t1est_deleteKeysByTags() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $this->addTags($MC, $MemcachedTags);
 
         $this->assertSame(1, $MemcachedTags->deleteKeysByTags(['country:Russia', 'city:Murmansk'], MemcachedTags::COMPILATION_XOR));
@@ -486,7 +486,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function test_getKeysByTag() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $this->addTags($MC, $MemcachedTags);
 
         $this->assertSame(['user:1', 'user:2', 'user:3', 'user:4', 'user:5'], $MemcachedTags->getKeysByTag('all'));
@@ -502,7 +502,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function test_getKeysByTags() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $this->addTags($MC, $MemcachedTags);
 
         $this->assertSame(['foo' => [], 'bar' => []], $MemcachedTags->getKeysByTags(['foo', 'bar']));
@@ -522,7 +522,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
      */
     public function test_setKeyWithTags() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $MC->flush();
 
         $this->assertSame(true, $MemcachedTags->setKeyWithTags('user:1', 'Alexander', ['city:London', 'sex:m']));
@@ -549,13 +549,12 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame('user:3', $MC->get('tag_t_country:Russia'));
     }
 
-
     /**
      * @see MemcachedTags::setKeysWithTags
      */
     public function test_setKeysWithTags() {
         $MC = static::$Memcached;
-        $MemcachedTags = new MemcachedTags($MC, 'tag');
+        $MemcachedTags = new MemcachedTags($MC);
         $MC->flush();
 
         $this->assertSame(true, $MemcachedTags->setKeysWithTags(['user:1' => 'Alexander', 'user:2' => 'Irina', 'user:5' => 'Dom'], ['city:London', 'country:UK']));
@@ -583,7 +582,6 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame('user:4||user:3', $MC->get('tag_t_sex:m'));
         $this->assertSame('city:Petersburg||country:Russia||sex:m', $MC->get('tag_k_user:3'));
         $this->assertSame('Ilya', $MC->get('user:3'));
-
     }
 
 }

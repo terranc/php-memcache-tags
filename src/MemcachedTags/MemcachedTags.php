@@ -16,7 +16,7 @@ use MemcachedLock\MemcachedLock;
 
 class MemcachedTags implements TagsInterface {
 
-    const VERSION = '0.1.0';
+    const VERSION = '1.0.0';
 
     const COMPILATION_ALL = 0;
     const COMPILATION_AND = 1;
@@ -35,7 +35,7 @@ class MemcachedTags implements TagsInterface {
     /**
      * @var string
      */
-    protected $prefix;
+    protected $prefix = 'tag';
 
     /**
      * @var string
@@ -44,11 +44,17 @@ class MemcachedTags implements TagsInterface {
 
     /**
      * @param Memcached $Memcached
-     * @param string $prefix
+     * @param array|null $config
      */
-    public function __construct(Memcached $Memcached, $prefix = 'tag') {
+    public function __construct(Memcached $Memcached, array $config = null) {
         $this->Memcached = $Memcached;
-        $this->prefix = $prefix;
+
+        if (isset($config['prefix'])) {
+            $this->prefix = $config['prefix'];
+        }
+        if (!empty($config['separator'])) {
+            $this->separator = $config['separator'];
+        }
     }
 
     /**
@@ -379,10 +385,10 @@ class MemcachedTags implements TagsInterface {
     /**
      * @inheritdoc
      */
-    public function setKeysWithTags(array $keys, $tags) {
+    public function setKeysWithTags(array $items, $tags) {
         $Lock = $this->createLock();
-        if ($this->Memcached->setMulti($keys)) {
-            return $this->_addTagsToKeys((array) $tags, array_keys($keys));
+        if ($this->Memcached->setMulti($items)) {
+            return $this->_addTagsToKeys((array) $tags, array_keys($items));
         }
         return false;
     }

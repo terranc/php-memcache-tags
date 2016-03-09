@@ -1,4 +1,13 @@
 <?php
+/**
+ * This file is part of MemcachedTags.
+ * git: https://github.com/cheprasov/php-memcached-tags
+ *
+ * (C) Alexander Cheprasov <cheprasov.84@ya.ru>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 require('./vendor/autoload.php');
 
 use MemcachedTags\MemcachedTags;
@@ -9,7 +18,7 @@ $Memcached = new \Memcached();
 $Memcached->addServer('127.0.0.1', '11211');
 $Memcached->flush();
 
-$MemcachedTags = new MemcachedTags($Memcached, 'tag_');
+$MemcachedTags = new MemcachedTags($Memcached, ['prefix' => 'users']);
 
 // Example 2. Adding some tags to key
 
@@ -28,6 +37,10 @@ $MemcachedTags->addTagsToKeys('sex:m', ['user:1', 'user:3', 'user:4', 'user:5'])
 $MemcachedTags->addTagsToKeys('sex:f', 'user:2');
 
 $MemcachedTags->addTagsToKeys('all', ['user:1','user:2', 'user:3', 'user:4', 'user:5']);
+
+// or you can create key with tags
+
+$MemcachedTags->setKeyWithTags('user:1', 'Alexander', ['country:UK', 'city:London', 'sex:m', 'all']);
 
 // Example 3. Get keys by tags
 
@@ -91,4 +104,4 @@ var_dump(
 var_dump(
     $MemcachedTags->deleteKeysByTags(['city:London', 'sex:f'], MemcachedTags::COMPILATION_XOR)
 );
-// int(1) - Count of deleted keys
+// int(2) - Count of deleted keys
