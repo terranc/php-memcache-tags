@@ -37,6 +37,9 @@ class MemcachedTags implements TagsInterface {
      */
     protected $prefix;
 
+    /**
+     * @var string
+     */
     protected $separator = '||';
 
     /**
@@ -118,15 +121,20 @@ class MemcachedTags implements TagsInterface {
      * @return string
      */
     protected function addData($json, $data) {
-        if (!$json || !($value = $this->decode($json))) {
-            $value = array_values($data);
+        if (!$json) {
+            return $this->encode($data);
         } else {
+            $str = $this->separator . $json . $this->separator;
+            $add = '';
             foreach ($data as $datum) {
-                $value[] = $datum;
+                $pos = strpos($str, $this->separator. $datum . $this->separator);
+                if ($pos !== false) {
+                    continue;
+                }
+                $add .= $this->separator. $datum;
             }
-            $value = array_unique($value);
+            return $json.$add;
         }
-        return $this->encode($value);
     }
 
     /**
@@ -135,14 +143,18 @@ class MemcachedTags implements TagsInterface {
      * @return string
      */
     protected function removeData($json, $data) {
-        if (!$json || !($value = $this->decode($json))) {
+        if (!$json) {
             return null;
         } else {
-            $value = array_diff($value, $data);
-            if (!$value) {
+            $data = array_map(function($d){
+                return $this->separator. $d . $this->separator;
+            }, $data);
+            $result = str_replace($data, $this->separator, $this->separator. $json .$this->separator);
+            if (!$result || $result === $this->separator) {
                 return null;
             }
-            return $this->encode(array_values($value));
+            $len = strlen($this->separator);
+            return substr($result, $len, -$len);
         }
     }
 
@@ -237,13 +249,51 @@ class MemcachedTags implements TagsInterface {
         return $this->_addTagsToKeys($tags, $keys);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function deleteKey($key) {
         return $this->deleteKeys((array) $key);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function deleteKeys(array $keys) {
         $Lock = $this->createLock();
         return $this->_removeKeys($keys);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function deleteTag($tag) {
+        return $this->deleteTags((array) $tag);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function deleteTags(array $tags) {
+        $Lock = $this->createLock();
+        $keys = $this->getKeysByTags($tags, self::COMPILATION_OR);
+        foreach ($keys as $key) {
+            $keyName = $this->getKeyNameForKey($key);
+            $value = $this->removeData($this->Memcached->get($keyName), $tags);
+            if (!$value) {
+                $this->Memcached->delete($keyName);
+            } else {
+                $this->Memcached->set($keyName, $value);
+            }
+        }
+        $result = 0;
+        // Because <deleteMulti> has strange behavior
+        foreach ($tags as $tag) {
+            if ($this->Memcached->delete($this->getKeyNameForTag($tag))) {
+                ++$result;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -315,21 +365,26 @@ class MemcachedTags implements TagsInterface {
         return $this->getDecodedMulti($this->getKeyHashesForKeys($keys));
     }
 
+    /**
+     * @inheritdoc
+     */
     public function setKeyWithTags($key, $value, $tags) {
         $Lock = $this->createLock();
-        $this->Memcached->set($key, $value);
-        $this->_addTagsToKeys((array) $tags, (array) $key);
+        if ($this->Memcached->set($key, $value)) {
+            return $this->_addTagsToKeys((array) $tags, (array) $key);
+        }
+        return false;
     }
 
     /**
-     * @param array $keys
-     * @param string|string[] $tags
-     * @return mixed
+     * @inheritdoc
      */
     public function setKeysWithTags(array $keys, $tags) {
         $Lock = $this->createLock();
-        $this->Memcached->setMulti($keys);
-        $this->_addTagsToKeys((array) $tags, array_keys($keys));
+        if ($this->Memcached->setMulti($keys)) {
+            return $this->_addTagsToKeys((array) $tags, array_keys($keys));
+        }
+        return false;
     }
 
 } 
