@@ -20,7 +20,6 @@
   },
   "require-dev": {
     "phpunit/phpunit": "5.1.*",
-    "cheprasov/php-parallel": "1.0.0",
-    "cheprasov/php-simple-profiler": "dev-master"
+    "cheprasov/php-parallel": "1.0.0"
   }
 }

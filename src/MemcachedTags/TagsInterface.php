@@ -35,14 +35,14 @@ interface TagsInterface {
     public function deleteKeys(array $keys);
 
     /**
-     * Delete tag. Keys will not be affected.
+     * Delete tag. Keys will be not affected.
      * @param string $tag
      * @return int Returns count of deleted tags
      */
     public function deleteTag($tag);
 
     /**
-     * Delete tags. Keys will not be affected.
+     * Delete tags. Keys will be not affected.
      * @param string[] $tags
      * @return int Returns count of deleted tags
      */
@@ -86,18 +86,20 @@ interface TagsInterface {
     public function getTagsByKey($key);
 
     /**
+     * Set value and tags to key.
      * @param string $key
      * @param string $value
      * @param string|string[] $tags
-     * @return mixed
+     * @return bool
      */
     public function setKeyWithTags($key, $value, $tags);
 
     /**
-     * @param array $keys
+     * Set values and tags to several keys.
+     * @param array $items
      * @param string|string[] $tags
-     * @return mixed
+     * @return bool
      */
-    public function setKeysWithTags(array $keys, $tags);
+    public function setKeysWithTags(array $items, $tags);
 
 }

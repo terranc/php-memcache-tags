@@ -34,7 +34,8 @@ class MemcachedTagsParallelTest extends \PHPUnit_Framework_TestCase {
 
         for ($i = 1; $i <= 5; $i++) {
             $Parallel->run('foo'.$i, function () use ($start) {
-                $MemcachedTags = new MemcachedTags($MC = $this->getMemcached(), 'tag');
+                $MemcachedTags = new MemcachedTags($MC = $this->getMemcached()
+                );
                 while (microtime(true) < $start) {
                     // wait for start
                 }
@@ -47,7 +48,7 @@ class MemcachedTagsParallelTest extends \PHPUnit_Framework_TestCase {
             });
         }
 
-        $MemcachedTags = new MemcachedTags($MC = $this->getMemcached(), 'tag');
+        $MemcachedTags = new MemcachedTags($MC = $this->getMemcached());
 
         while (microtime(true) < $start) {
             // wait for start
