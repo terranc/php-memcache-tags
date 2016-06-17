@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of RedisClient.
- * git: https://github.com/cheprasov/php-redis-client
+ * git: https://github.com/cheprasov/php-memcached-tags
  *
  * (C) Alexander Cheprasov <cheprasov.84@ya.ru>
  *
@@ -31,7 +31,7 @@ class VersionTest extends \PHPUnit_Framework_TestCase {
             strpos($readme[4], 'MemcachedTags v'.$composer['version']) > 0,
             'Please, change version in README.md'
         );
-        
+
     }
 
 }
