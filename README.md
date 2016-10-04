@@ -11,6 +11,63 @@ MemcachedTags for PHP is a mechanism for adding tags to keys in Memcached. It is
 - Data modification functions such as delete/add/set use [Locks](https://github.com/cheprasov/php-memcached-lock) to prevent losing data.
 - MemcachedTags does not affect original keys. It creates own keys for service tags.
 
+## How it works
+I will try to explain a mechanism, how memcached stores tags.
+
+Imagine, you have some 3 keys in memcached (user1, user2, user3):
+
+```
+MEMCACHED (key : value)
+user1 : {"name":"Alexander", "sex":"m", "city":"London"}
+user2 : {"name":"Irina", "sex":"f", "city":"London"}
+user3 : {"name":"Dima", "sex":"m", "city":"Murmansk"}
+```
+
+Now, lets add tag 'London' to users:
+
+```php
+// php code
+MemcachedTags->addTagsToKeys('London', ['user1', 'user2']);
+```
+And, as result, the memcached will contain:
+
+```
+MEMCACHED (key : value)
+user1 : {"name":"Alexander", "sex":"m", "city":"London"}
+user2 : {"name":"Irina", "sex":"f", "city":"London"}
+user3 : {"name":"Dima", "sex":"m", "city":"Murmansk"}
+
+tag_k_user1 : London
+tag_k_user2 : London
+
+tag_t_London : user1||user2
+```
+
+And, lets add tags 'male' and 'female' to users:
+
+```php
+// php code
+MemcachedTags->addTagsToKeys('male', ['user1', 'user3']);
+MemcachedTags->addTagsToKeys('female', 'user2');
+```
+
+And, as result, the memcached will contain:
+
+```
+MEMCACHED (key : value)
+user1 : {"name":"Alexander", "sex":"m", "city":"London"}
+user2 : {"name":"Irina", "sex":"f", "city":"London"}
+user3 : {"name":"Dima", "sex":"m", "city":"Murmansk"}
+
+tag_k_user1 : London||male
+tag_k_user2 : London||female
+tag_k_user3 : male
+
+tag_t_London : user1||user2
+tag_t_male   : user1||user3
+tag_t_female : user2
+```
+
 ## Usage
 
 ```php
