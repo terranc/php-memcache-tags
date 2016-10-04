@@ -249,8 +249,8 @@ class MemcachedTags implements TagsInterface {
      * @inheritdoc
      */
     public function addTagsToKeys($tags, $keys) {
-        $tags = is_array($tags) ? array_unique($tags) : (array) $tags;
-        $keys = is_array($keys) ? array_unique($keys) : (array) $keys;
+        $tags = is_array($tags) ? array_unique($tags) : [$tags];
+        $keys = is_array($keys) ? array_unique($keys) : [$keys];
         $Lock = $this->createLock();
         return $this->_addTagsToKeys($tags, $keys);
     }
