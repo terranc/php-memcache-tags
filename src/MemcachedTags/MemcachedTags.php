@@ -16,7 +16,7 @@ use MemcachedLock\MemcachedLock;
 
 class MemcachedTags implements TagsInterface {
 
-    const VERSION = '1.0.3';
+    const VERSION = '1.0.4';
 
     const COMPILATION_ALL = 0;
     const COMPILATION_AND = 1;
@@ -41,12 +41,6 @@ class MemcachedTags implements TagsInterface {
      * @var string
      */
     protected $separator = '||';
-    
-    /**
-     * Default is 0. The key will be stored forever unless deleted
-     * @var int
-     */
-    protected $expTime = 0;
 
     /**
      * @param Memcached $Memcached
@@ -60,9 +54,6 @@ class MemcachedTags implements TagsInterface {
         }
         if (!empty($config['separator'])) {
             $this->separator = $config['separator'];
-        }
-        if (!empty($config['expTime'])) {
-            $this->expTime = $config['expTime'];
         }
     }
 
@@ -131,40 +122,40 @@ class MemcachedTags implements TagsInterface {
     }
 
     /**
-     * @param string $json
+     * @param string $serialized
      * @param array $data
      * @return string
      */
-    protected function addData($json, $data) {
-        if (!$json) {
+    protected function addData($serialized, array $data) {
+        if (!$serialized) {
             return $this->encode($data);
         } else {
-            $str = $this->separator . $json . $this->separator;
+            $str = $this->separator . $serialized . $this->separator;
             $add = '';
             foreach ($data as $datum) {
-                $pos = strpos($str, $this->separator. $datum . $this->separator);
+                $pos = strpos($str, $this->separator . $datum . $this->separator);
                 if ($pos !== false) {
                     continue;
                 }
-                $add .= $this->separator. $datum;
+                $add .= $this->separator . $datum;
             }
-            return $json.$add;
+            return $serialized . $add;
         }
     }
 
     /**
-     * @param string $json
+     * @param string $serialized
      * @param array $data
      * @return string
      */
-    protected function removeData($json, $data) {
-        if (!$json) {
+    protected function removeData($serialized, array $data) {
+        if (!$serialized) {
             return null;
         } else {
             $data = array_map(function($d){
-                return $this->separator. $d . $this->separator;
+                return $this->separator . $d . $this->separator;
             }, $data);
-            $result = str_replace($data, $this->separator, $this->separator. $json .$this->separator);
+            $result = str_replace($data, $this->separator, $this->separator . $serialized . $this->separator);
             if (!$result || $result === $this->separator) {
                 return null;
             }
@@ -182,15 +173,15 @@ class MemcachedTags implements TagsInterface {
         $count = 0;
         foreach ($tags as $tag) {
             $keyName = $this->getKeyNameForTag($tag);
-            $json = $this->addData($this->Memcached->get($keyName), $keys);
-            if ($this->Memcached->set($keyName, $json, $this->expTime)) {
+            $serialized = $this->addData($this->Memcached->get($keyName), $keys);
+            if ($this->Memcached->set($keyName, $serialized)) {
                 ++$count;
             }
         }
         foreach ($keys as $key) {
             $keyName = $this->getKeyNameForKey($key);
-            $json = $this->addData($this->Memcached->get($keyName), $tags);
-            $this->Memcached->set($keyName, $json, $this->expTime);
+            $serialized = $this->addData($this->Memcached->get($keyName), $tags);
+            $this->Memcached->set($keyName, $serialized);
         }
         return $count === count($tags);
     }
@@ -219,7 +210,7 @@ class MemcachedTags implements TagsInterface {
             if (!$value) {
                 $this->Memcached->delete($keyName);
             } else {
-                $this->Memcached->set($keyName, $value, $this->expTime);
+                $this->Memcached->set($keyName, $value);
             }
         }
         return $result;
@@ -298,7 +289,7 @@ class MemcachedTags implements TagsInterface {
             if (!$value) {
                 $this->Memcached->delete($keyName);
             } else {
-                $this->Memcached->set($keyName, $value, $this->expTime);
+                $this->Memcached->set($keyName, $value);
             }
         }
         $result = 0;
@@ -385,7 +376,7 @@ class MemcachedTags implements TagsInterface {
      */
     public function setKeyWithTags($key, $value, $tags) {
         $Lock = $this->createLock();
-        if ($this->Memcached->set($key, $value, $this->expTime)) {
+        if ($this->Memcached->set($key, $value)) {
             return $this->_addTagsToKeys((array) $tags, (array) $key);
         }
         return false;
@@ -396,7 +387,7 @@ class MemcachedTags implements TagsInterface {
      */
     public function setKeysWithTags(array $items, $tags) {
         $Lock = $this->createLock();
-        if ($this->Memcached->setMulti($items, $this->expTime)) {
+        if ($this->Memcached->setMulti($items)) {
             return $this->_addTagsToKeys((array) $tags, array_keys($items));
         }
         return false;
