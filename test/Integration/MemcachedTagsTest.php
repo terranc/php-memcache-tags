@@ -390,10 +390,13 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
     /**
      * @see MemcachedTags::deleteKeysByTags
      */
-    public function t1est_deleteKeysByTags() {
+    public function test_deleteKeysByTags() {
         $MC = static::$Memcached;
         $MemcachedTags = new MemcachedTags($MC);
         $this->addTags($MC, $MemcachedTags);
+
+        $this->assertSame(0, $MemcachedTags->deleteKeysByTags([]));
+        $this->assertSame(0, $MemcachedTags->deleteKeysByTags([], MemcachedTags::COMPILATION_XOR));
 
         $this->assertSame(1, $MemcachedTags->deleteKeysByTags(['country:Russia', 'city:Murmansk'], MemcachedTags::COMPILATION_XOR));
 
@@ -418,7 +421,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame(true, isset($MC->get('user:4')[0]));
         $this->assertSame(true, isset($MC->get('user:5')[0]));
 
-        $this->assertSame(0, $MemcachedTags->deleteKeysByTags(['country:Russia', 'city:Murmansk'], MemcachedTags::COMPILATION_AND));
+        $this->assertSame(1, $MemcachedTags->deleteKeysByTags(['country:Russia', 'city:Murmansk'], MemcachedTags::COMPILATION_AND));
 
         $this->assertSame(false, $MC->get('tag_t_city:Murmansk'));
         $this->assertSame(false, $MC->get('tag_t_city:Petersburg'));
@@ -441,9 +444,8 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame(false, isset($MC->get('user:4')[0]));
         $this->assertSame(true, isset($MC->get('user:5')[0]));
 
-        $this->assertSame(0, $MemcachedTags->deleteKeysByTags(['sex:f', 'sex:f'], MemcachedTags::COMPILATION_XOR));
+        $this->assertSame(2, $MemcachedTags->deleteKeysByTags(['sex:m']));
         $this->assertSame(0, $MemcachedTags->deleteKeysByTags(['foo', 'bar'], MemcachedTags::COMPILATION_OR));
-        $this->assertSame(2, $MemcachedTags->deleteKeysByTags(['sex:m', 'sex:m'], MemcachedTags::COMPILATION_AND));
 
         $this->assertSame(false, $MC->get('tag_t_city:Murmansk'));
         $this->assertSame(false, $MC->get('tag_t_city:Petersburg'));
@@ -518,6 +520,7 @@ class MemcachedTagsTest extends \PHPUnit_Framework_TestCase {
         $this->assertSame([], $MemcachedTags->getKeysByTags(['foo', 'bar'], MemcachedTags::COMPILATION_XOR));
         $this->assertSame([], $MemcachedTags->getKeysByTags(['foo', 'bar'], MemcachedTags::COMPILATION_AND));
         $this->assertSame(['sex:f' => ['user:2'], 'city:Murmansk' => ['user:4']], $MemcachedTags->getKeysByTags(['sex:f', 'city:Murmansk']));
+        $this->assertSame(['sex:f' => ['user:2']], $MemcachedTags->getKeysByTags(['sex:f']));
         $this->assertSame(['user:2', 'user:4'], $MemcachedTags->getKeysByTags(['sex:f', 'city:Murmansk'], MemcachedTags::COMPILATION_OR));
         $this->assertSame(['user:1', 'user:5'], $MemcachedTags->getKeysByTags(['sex:m', 'city:London'], MemcachedTags::COMPILATION_AND));
         $this->assertSame(['user:3', 'user:4'], $MemcachedTags->getKeysByTags(['sex:m', 'city:London'], MemcachedTags::COMPILATION_XOR));

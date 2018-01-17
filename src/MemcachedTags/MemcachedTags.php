@@ -16,7 +16,7 @@ use MemcachedLock\MemcachedLock;
 
 class MemcachedTags implements TagsInterface {
 
-    const VERSION = '1.0.4';
+    const VERSION = '1.0.5';
 
     const COMPILATION_ALL = 0;
     const COMPILATION_AND = 1;
@@ -338,6 +338,12 @@ class MemcachedTags implements TagsInterface {
      */
     public function getKeysByTags(array $tags, $compilation = MemcachedTags::COMPILATION_ALL) {
         $data = $this->getDecodedMulti($this->getKeyHashesForTags($tags));
+        if (count($data) < 2) {
+            if (!$data) {
+                return [];
+            }
+            return $compilation == MemcachedTags::COMPILATION_ALL ? $data : reset($data);
+        }
         switch ($compilation) {
             case self::COMPILATION_ALL:
                 return $data;
