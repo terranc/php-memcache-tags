@@ -11,6 +11,7 @@
 namespace MemcachedTags;
 
 use InvalidArgumentException;
+use Memcache;
 use Memcached;
 use MemcachedLock\MemcachedLock;
 
@@ -46,7 +47,7 @@ class MemcachedTags implements TagsInterface {
      * @param Memcached $Memcached
      * @param array|null $config
      */
-    public function __construct(Memcached $Memcached, array $config = null) {
+    public function __construct(Memcache|Memcached $Memcached, array $config = null) {
         $this->Memcached = $Memcached;
 
         if (isset($config['prefix'])) {
