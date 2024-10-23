@@ -47,7 +47,7 @@ class MemcachedTags implements TagsInterface {
      * @param Memcached $Memcached
      * @param array|null $config
      */
-    public function __construct(Memcache|Memcached $Memcached, array $config = null) {
+    public function __construct(Memcache $Memcached, array $config = null) {
         $this->Memcached = $Memcached;
 
         if (isset($config['prefix'])) {
